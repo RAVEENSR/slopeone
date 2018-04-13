@@ -21,7 +21,7 @@ interface Slopeone {
      * Update matrices with user preference data, accepts an Array.
      * @param array $userPrefs user preference data
      */
-    public function add($userPrefs);
+    public function update($userPrefs);
 
 
     /**
@@ -30,4 +30,11 @@ interface Slopeone {
      * @return array predictions
      */
     public function predict($userPrefs);
+
+
+    /**
+     * Gets the computed model
+     * @return array model
+     */
+    public function getModel();
 }

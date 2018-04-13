@@ -13,112 +13,83 @@ namespace PHPJuice\Slopeone;
 class Algorithm implements \PHPJuice\Slopeone\Contracts\Slopeone {
 
   /**
-   * $diffs Differential ratings matrix.
+  * $diffs Differential ratings matrix.
+  * @var array
+  */
+  protected $diffs;
+
+  /**
+   * $freqs Ratings count matrix.
    * @var array
    */
-    protected $diffs;
+  protected $freqs;
 
-    /**
-     * $freqs Ratings count matrix.
-     * @var array
-     */
-    protected $freqs;
+  /**
+   * Reset the instance.
+   */
+  public function clear() {
+      $this->diffs = null;
+      $this->freqs = null;
+  }
 
-    /**
-     * Reset the instance.
-     */
-    public function clear() {
-        $this->diffs = null;
-        $this->freqs = null;
-    }
-
-    /**
-     * Update matrices with user preference data, accepts an Array.
-     * @param array $userPrefs user preference data
-     * @return Algorithm
-     */
-    public function add($userPrefs) {
-        foreach ($userPrefs as $item => $rating) {
-            foreach ($userPrefs as $item2 => $rating2) {
-                // Check if we are calculating an item against it self
-                if ($item  == $item2) {
-                    continue;
-                }
-                // if this item is not already set we initialize it
-                if (!isset($this->freqs[$item][$item2])) {
-                    $this->freqs[$item][$item2] = 0;
-                }
-                // if this item is not already set we initialize it
-                if (!isset($this->diffs[$item][$item2])) {
-                    $this->diffs[$item][$item2] = 0;
-                }
-
-                // here we increment the freqs matrix
-                $this->freqs[$item][$item2] += 1;
-                // add the new diff to the diffs array
-                $this->diffs[$item][$item2] += $rating - $rating2;
-            }
+  /**
+   * Update matrices with user preference data, accepts an Array.
+   * @param array $userPrefs user preference data
+   * @return Algorithm
+   */
+  public function update($userData) {
+    foreach($userData as $ratings){
+      foreach($ratings as $item1=>$rating1){
+        isset($this->freqs[$item1]) || $this->freqs[$item1] = [];
+        isset($this->diffs[$item1]) || $this->diffs[$item1] = [];
+        foreach($ratings as $item2=>$rating2){
+          isset($this->freqs[$item1][$item2]) || $this->freqs[$item1][$item2] = 0;
+          isset($this->diffs[$item1][$item2]) || $this->diffs[$item1][$item2] = 0.0;
+          $this->freqs[$item1][$item2] += 1;
+          $this->diffs[$item1][$item2] += $rating1 - $rating2;
         }
-        return $this;
+      }
     }
-
-    /**
-     * Recommend new items given known item ratings.
-     * @param array $userPrefs user preference data
-     * @return array predictions
-     */
-    public function predict($userPrefs) {
-        // Calculate Diffs Matrix
-        $this->calculateDiffsMatrix();
-        $preds= [];
-        $freqs= [];
-        $results = [];
-        foreach ($userPrefs as $item => $rating) {
-            foreach ($this->diffs as $diff_item => $diff_ratings) {
-                // if this item is not already set we initialize it
-                if (
-          !isset($this->freqs[$diff_item]) ||
-          !isset($diff_ratings[$item]) ||
-          !isset($this->freqs[$diff_item][$item])
-        ) {
-                    continue;
-                }
-                // we get the frequency for this item
-                // from the frequencies matrix
-                $freq = $this->freqs[$diff_item][$item];
-
-
-                // if this item is not already set we initialize it
-                if (!isset($preds[$diff_item])) {
-                    $preds[$diff_item] = 0;
-                }
-                // if this item is not already set we initialize it
-                if (!isset($freqs[$diff_item])) {
-                    $freqs[$diff_item] = 0;
-                }
-
-                $preds[$diff_item] += $freq * ($diff_ratings[$item] + $rating);
-                $freqs[$diff_item] += $freq;
-            }
-        }
-
-        foreach ($preds as $item => $rating) {
-            if (isset($data[$item]) && $freqs[$item] > 0) {
-                continue;
-            }
-            $results[$item] = $rating / $freqs[$item];
-        }
-        return $results;
+    foreach($this->diffs as $item1 => &$ratings){
+      foreach($ratings as $item2=>$rating){
+        $diff = ( $ratings[$item2] / $this->freqs[$item1][$item2] );
+        $ratings[$item2] = round($diff,2);
+      }
     }
+  }
 
-    private function calculateDiffsMatrix() {
-        $tempArray = [];
-        foreach ($this->diffs as $item => $ratings) {
-            foreach ($ratings as $item2 => $rating2) {
-                $tempArray[$item][$item2] = $this->diffs[$item][$item2] / $this->freqs[$item][$item2];
-            }
+  /**
+   * Recommend new items given known item ratings.
+   * @param array $userPrefs user preference data
+   * @return array predictions
+   */
+  public function predict($userPrefs) {
+    $preds = [];
+    $freqs = [];
+    $results = [];
+    foreach ($userPrefs as $item=>$rating){
+      foreach($this->diffs as $diffItem=>$diffRatings){
+        if(
+          isset($this->freqs[$diffItem]) &&
+          isset($this->freqs[$diffItem][$item])
+        ){
+          $freq = $this->freqs[$diffItem][$item];
+          isset($preds[$diffItem]) || $preds[$diffItem] = 0.0;
+          isset($freqs[$diffItem]) || $freqs[$diffItem] = 0;
+          $preds[$diffItem] += $freq * ($diffRatings[$item] + $rating);
+          $freqs[$diffItem] += $freq;
         }
-        $this->diffs = $tempArray;
-        return $this;
+      }
     }
+    foreach($preds as $item => $value){
+      if (!isset($userPrefs[$item]) && $freqs[$item] > 0){
+        $results[$item] = round ( $value/$freqs[$item] , 2);
+      }
+    }
+    return $results;
+  }
+
+  public function getModel(){
+    return $this->diffs;
+  }
 }
