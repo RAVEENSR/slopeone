@@ -42,24 +42,10 @@ $slopeone = new Algorithm();
 
 ### Adding Rating values
 
-Adding Rating values can be easly done by providing an array of user ratings via the add() method:
+Adding Rating values can be easly done by providing an array of users ratings via the update() method:
 
 ```php
-// ratings data
-$userPrefs = [
-  "squid" => 1,
-  "cuttlefish" => 0.5,
-  "octopus" => 0.2
-];
 
-// Add the data
-$slopeone->add($userPrefs);
-
-```
-
-Another method is to iterate over a collection of users ratings and add it to slopeone:
-
-```php
 $data =[
   [
     "squid" => 1,
@@ -84,9 +70,8 @@ $data =[
   ]
 ];
 
-foreach ($data as $user => $userPrefs) {
-  $slopeone->add($userPrefs);
-}
+$slopeone->update($data);
+
 ```
 
 ### Predicting ratings
