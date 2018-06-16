@@ -2,10 +2,11 @@
 
 PHP implementation of the Weighted Slope One rating-based collaborative filtering scheme.
 
-## Build status
+[![Latest Stable Version](https://poser.pugx.org/phpjuice/slopeone/v/stable)](https://packagist.org/packages/phpjuice/slopeone)
+[![Total Downloads](https://poser.pugx.org/phpjuice/slopeone/downloads)](https://packagist.org/packages/phpjuice/slopeone)
 [![Build Status](https://travis-ci.org/PHPJuice/slopeone.svg?branch=master)](https://travis-ci.org/PHPJuice/slopeone)
 [![GitHub issues](https://img.shields.io/github/issues/PHPJuice/slopeone.svg)](https://github.com/PHPJuice/slopeone/issues)
-[![GitHub license](https://img.shields.io/github/license/PHPJuice/slopeone.svg)](https://github.com/PHPJuice/slopeone/blob/master/LICENSE)
+[![License](https://poser.pugx.org/phpjuice/slopeone/license)](https://packagist.org/packages/phpjuice/slopeone)
 
 ## Requirements
 Slopeone Package requires PHP 5.6+
